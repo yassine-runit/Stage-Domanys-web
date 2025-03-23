@@ -1,0 +1,284 @@
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  background-color: white;
+  border-bottom-right-radius: 30px;
+  box-shadow: 0 4px 10px rgba(0, 71, 151, 0.1);
+  position: fixed;
+  top: 0;
+  left: 280px;
+  right: 0;
+  height: 70px;
+  z-index: 100;
+  transition: all 0.3s ease;
+  
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+
+.nav-menu {
+  display: flex;
+  gap: 10px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  color: #333;;
+  text-decoration: none;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: #f0f7ff;
+  color: #004797;
+}
+
+.nav-item.active {
+  color: #004797;
+}
+
+.nav-icon {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.nav-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+
+.patrimoine-filter {
+  position: relative;
+  min-width: 250px;
+}
+
+.patrimoine-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  font-size: 14px;
+  background-color: white;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  color: #004797;
+  padding: 10px 15px;
+  transition: all 0.2s ease;
+  padding-left: 30px;
+}
+
+.patrimoine-selector:hover {
+  border-color: #004797;
+  box-shadow: 0 2px 6px rgba(0, 71, 151, 0.15);
+}
+
+.dropdown-icon {
+  font-size: 16px;
+  margin-left: 8px;
+  color: #333;;
+}
+
+.clear-filter-btn {
+  position: absolute;
+  margin-left: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.clear-filter-btn:hover {
+  background-color: #f0f0f0;
+  color: #555;
+}
+
+.patrimoine-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 8px;
+  z-index: 200;
+  max-height: 300px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.search-container {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+  width: 73%;
+}
+
+.search-icon {
+  position: absolute;
+  left: 22px;
+  top: 22px;
+  color: #999;
+}
+
+.search-container input {
+  width: 100%;
+  padding: 10px 12px 10px 30px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.search-container input:focus {
+  outline: none;
+  border-color: #004797;
+}
+
+.patrimoine-list {
+  overflow-y: auto;
+  max-height: 240px;
+}
+
+.patrimoine-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 14px;
+}
+
+.patrimoine-item:hover {
+  background-color: #f0f7ff;
+}
+
+
+
+.no-results {
+  padding: 15px;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  font-size: 14px;
+}
+
+
+.user-profile {
+  position: relative;
+}
+
+.user-profile-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: background-color 0.2s;
+}
+
+.user-profile-toggle:hover {
+  background-color: #f0f7ff;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #004797;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  margin-right: 10px;
+}
+
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 5px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-top: 8px;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.user-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  color: #333;
+}
+
+.user-menu-item:hover {
+  background-color: #f0f7ff;
+  color: #004797;
+}
+
+.menu-icon {
+  margin-right: 10px;
+  font-size: 18px;
+  color: #666;
+}
+
+.menu-label {
+  font-size: 14px;
+}
+
+
+.app-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  padding: 10px;
+  background: #f9f9f9;
+  overflow-y: auto;
+  margin-left: 281px; 
+  margin-top: 60px;
+}
+

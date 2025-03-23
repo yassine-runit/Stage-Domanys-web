@@ -1,0 +1,367 @@
+.dashboard {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    width: 1170px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    margin-top: 20px;
+    margin-left: 10px;
+}
+
+.headerCalendar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.week-navigation {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #004797;
+}
+
+.week-navigation button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    padding: 15px;
+    cursor: pointer;
+    font-size: 1.2em;
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    color: #004797;
+}
+
+.current-week {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.filter-section {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 1.1em;
+    background-color: white;
+    border-radius: 30px;
+    border: 1px solid #e0e0e0;
+    color: #5ca9dc;
+    padding: 15px;
+    position: relative;
+}
+
+
+.filter-section::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 53%;
+    transform: translate(-50%, -50%);
+    width: 1px;
+    height: 100%; 
+    background-color: #e0e0e0;
+}
+
+.filter-section button {
+    background-color: transparent; 
+    color: #5ca9dc;
+    border: none;
+    cursor: pointer;
+    padding: 0 15px;
+    font-size: 1em;
+    transition: color 0.3s;
+}
+
+.filter-section button.active {
+    background-color: transparent;  
+    color: #004797;
+    font-weight: 530;
+}
+
+.current-day {
+    font-size: 1.1em;
+    font-weight: 530;
+    background-color: white;
+    border-radius: 30px;
+    border: 1px solid #e0e0e0;
+    color: #004797;
+    padding: 15px;
+}
+
+
+.calendar-container {
+    position: relative;
+    overflow-y: auto;
+    height: calc(100vh - 200px);  
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    width: 100%; 
+    max-width: 1150px;
+}
+
+
+.header-row {
+    display: flex;
+    position: sticky;
+    top: 0;
+    background-color: #ffffff;
+    z-index: 10;
+    border-bottom: 2px solid #e0e0e0;  
+}
+
+.calendar-body {
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.time-column {
+    width: 60px;
+    min-width: 60px;
+    text-align: right;
+    padding: 10px;
+    background-color: #ffffff;
+    color: #004797;
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    border-right: 2px solid #e0e0e0; 
+    
+}
+
+.day-column {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background-color: #ffffff;
+    position: relative;
+    min-width: 120px;
+    border-right: 1px solid #e0e0e0;
+}
+
+.day-column.today {
+    background-color: #e3f2fd;
+    color: #004797;
+}
+
+.day-header {
+    font-weight: 600;
+    color: #004797;
+}
+
+.hour-row {
+    display: flex;
+    min-height: 60px;
+    position: relative;
+    width: 100%;
+    border-bottom: 1px solid #e0e0e0;  
+}
+
+.day-cell {
+    flex: 1;
+    position: relative;
+    min-width: 120px;
+    border-right: 1px solid #e0e0e0;
+    height: 100%;
+}
+
+
+.current-time-line {
+    position: absolute;
+    left: 60px; 
+    right: 0;
+    height: 2px;
+    background-color: rgb(252, 0, 143);  
+    z-index: 5;
+    pointer-events: none;
+}
+
+.current-time-line::before {
+    content: '';
+    position: absolute;
+    left: -4px; 
+    top: -4px;
+    width: 8px;
+    height: 8px;
+    background-color: rgb(252, 0, 143);
+    border-radius: 50%;
+}
+
+.event {
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    z-index: 5;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.event-time-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9em;
+    z-index: 2;
+}
+
+.event-time-debut, .event-time-fin {
+    color: white;
+    padding: 2px 5px;
+    border-radius: 3px;
+    
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.event-details {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 0;
+}
+
+.event-details-prestation {
+    font-weight: bold;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-details-patrimoine {
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.event-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+}
+
+.event-status img {
+    width: 16px;
+    height: 16px;
+}
+
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+
+.popup-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+}
+
+.popup-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #333;
+}
+
+.popup-close:hover {
+    color: #000;
+}
+
+
+.popup-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+
+.popup-content h2 {
+    margin-top: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+
+.popup-content p {
+    margin: 10px 0;
+    font-size: 1em;
+    color: #555;
+}
+
+
+.popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.popup-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.popup-button.cancel {
+    background-color: #f1f1f1;
+    color: #333;
+}
+
+.popup-button.cancel:hover {
+    background-color: #ddd;
+}
+
+.popup-button.validate {
+    background-color: #3498db;
+    color: white;
+}
+
+.popup-button.validate:hover {
+    background-color: #2980b9;
+}
+
+
+.popup-content input[type="checkbox"] {
+    margin-right: 10px;
+}
+
