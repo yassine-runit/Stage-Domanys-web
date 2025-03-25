@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FiUsers, FiBriefcase, FiPlus } from "react-icons/fi"; 
+import { FiUsers, FiBriefcase, FiPlus, FiX } from "react-icons/fi"; 
 import "../styles/sidebar.css";
 import config from '../config';
 import { LogoImg } from "../Themes/Images";
+import AddPrestationModal from "./ajoutprestation";
 
 const Sidebar = ({ onFilterChange }) => {
     const [collaborators, setCollaborators] = useState([]);
@@ -11,6 +12,7 @@ const Sidebar = ({ onFilterChange }) => {
     const [selectedCollaborators, setSelectedCollaborators] = useState([]);
     const [selectedServices, setSelectedServices] = useState([]);
     const [loading, setLoading] = useState(true);  
+    const [showAddPrestationModal, setShowAddPrestationModal] = useState(false);
 
     const navigate = useNavigate();
 
@@ -52,7 +54,7 @@ const Sidebar = ({ onFilterChange }) => {
     };
 
     const handleCreatePrestationClick = () => {
-        navigate('/ajoutprestation');
+        setShowAddPrestationModal(true); 
     };
 
     return (
@@ -129,7 +131,25 @@ const Sidebar = ({ onFilterChange }) => {
                     </div>
                 </>
             )}
+        
+
+        {showAddPrestationModal && (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <button 
+                        className="close-modal-btn" 
+                        onClick={() => setShowAddPrestationModal(false)}
+                    >
+                        <FiX />
+                    </button>
+                    <AddPrestationModal onClose={() => setShowAddPrestationModal(false)} />
+                </div>
+            </div>
+        )}
+
         </aside>
+
+
     );
 };
 

@@ -77,8 +77,8 @@ const Header = ({ onFilterChange }) => {
   const handlePatrimoineSelect = (patrimoine) => {
     setSelectedPatrimoine(patrimoine);
     setShowDropdown(false);
-    const patrimoineId = patrimoine ? patrimoine.id : null;
-    onFilterChange([], [], patrimoineId);
+   
+    onFilterChange([], [], patrimoine);
   };
 
 
@@ -139,7 +139,11 @@ const Header = ({ onFilterChange }) => {
             className="patrimoine-selector"
             onClick={() => setShowDropdown(!showDropdown)}
           >
-            <span>{selectedPatrimoine ? `Patrimoine: ${selectedPatrimoine.id}` : "Choisir un patrimoine"}</span>
+            <span>
+              {selectedPatrimoine 
+                ? `Patrimoine: ${selectedPatrimoine.id}` 
+                : "Choisir un patrimoine"}
+            </span>
             <FiChevronDown className="dropdown-icon" />
           </div>
           

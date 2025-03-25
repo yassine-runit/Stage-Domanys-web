@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import "../styles/dashboard.css";
 import config from "../config";
 import { CheckIcon, ClockIcon } from "../Themes/Images";
@@ -10,116 +10,99 @@ const Dashboard = ({ selectedCollaborators, selectedServices, selectedPatrimoine
   const [filterType, setFilterType] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [validationMessage, setValidationMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const calendarRef = useRef(null);
 
-
-
-  useEffect(() => {
-    console.log("Props reçues dans Dashboard:", {
-      selectedCollaborators,
-      selectedServices,
-      selectedPatrimoine,
-      typePatrimoine: typeof selectedPatrimoine
-    });
-  }, [selectedCollaborators, selectedServices, selectedPatrimoine]);
-
-  const getStartOfWeek = (date) => {
+  const getStartOfWeek = useCallback((date) => {
     const startOfWeek = new Date(date);
     const day = startOfWeek.getDay();
-   
     const diff = day === 0 ? 6 : day - 1;
     startOfWeek.setDate(startOfWeek.getDate() - diff);
     startOfWeek.setHours(0, 0, 0, 0);
     return startOfWeek;
-  };
+  }, []);
 
-  
+  const getEndOfWeek = useCallback((startDate) => {
+    const endOfWeek = new Date(startDate);
+    endOfWeek.setDate(endOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+    return endOfWeek;
+  }, []);
+
   useEffect(() => {
     const today = new Date();
     setCurrentWeek(getStartOfWeek(today));
     setCurrentTime(today);
-
 
     const timeInterval = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
 
     return () => clearInterval(timeInterval);
-  }, []);
+  }, [getStartOfWeek]);
 
-  
   useEffect(() => {
     if (calendarRef.current) {
       const currentHour = new Date().getHours();
-      const scrollPosition = currentHour * 60; 
-      calendarRef.current.scrollTop = scrollPosition - 100; 
+      const scrollPosition = currentHour * 60;
+      calendarRef.current.scrollTop = scrollPosition - 100;
     }
   }, []);
-
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-      
         if (selectedCollaborators.length === 0) {
           setEvents([]);
           return;
         }
 
+        setIsLoading(true);
         const startOfWeek = getStartOfWeek(currentWeek);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(endOfWeek.getDate() + 6);
-        endOfWeek.setHours(23, 59, 59, 999);
-  
-        const startOfWeekStr = startOfWeek.toISOString().split("T")[0];
-        const endOfWeekStr = endOfWeek.toISOString().split("T")[0];
-  
-      
-        let apiUrl = `${config.API_BASE_URL}/prestations/semaine/test?startOfWeek=${startOfWeekStr}&endOfWeek=${endOfWeekStr}`;
-        
-        
-        if (filterType === 1) {
-          apiUrl += '&est_recurrent=1';
-        }
-        
-        console.log(`Appel API: ${apiUrl}`);
-        
+        const endOfWeek = getEndOfWeek(startOfWeek);
+
+        const params = new URLSearchParams({
+          startOfWeek: startOfWeek.toISOString().split("T")[0],
+          endOfWeek: endOfWeek.toISOString().split("T")[0],
+          ...(filterType === 1 && { est_recurrent: '1' })
+        });
+
+        const apiUrl = `${config.API_BASE_URL}/prestations/semaine/test?${params}`;
         const response = await fetch(apiUrl);
-  
-        if (!response.ok) throw new Error(`Erreur HTTP: ${response.status} ${response.statusText}`);
-  
+
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+
         const data = await response.json();
-        
-        console.log("Données récupérées:", data);
-        console.log("Patrimoine sélectionné:", selectedPatrimoine);
-  
-        
+
         const filteredEvents = data.filter((event) => {
+          if (filterType === 1 && event.est_recurrent !== "1") return false;
+          
           const matchesCollaborators = selectedCollaborators.includes(event.id_collaborateur);
-          const matchesServices = selectedServices.length === 0 || selectedServices.includes(event.id_type_prestation);
-          const matchesPatrimoine = selectedPatrimoine === null || selectedPatrimoine === undefined || String(event.id_patrimoine) === String(selectedPatrimoine);
-  
-          console.log("Comparaison pour événement:", event.id, 
-                     "id_patrimoine:", event.id_patrimoine, 
-                     "selectedPatrimoine:", selectedPatrimoine, 
-                     "type selectedPatrimoine:", typeof selectedPatrimoine,
-                     "matchesPatrimoine:", matchesPatrimoine);
-  
+          const matchesServices = selectedServices.length === 0 || 
+              selectedServices.includes(event.id_type_prestation);
+            const matchesPatrimoine = !selectedPatrimoine || 
+              (selectedPatrimoine && event.id_patrimoine === selectedPatrimoine.id);
+          
           return matchesCollaborators && matchesServices && matchesPatrimoine;
         });
-  
-        console.log("Événements filtrés:", filteredEvents);
-        console.log("Nombre d'événements filtrés:", filteredEvents.length);
+
         setEvents(filteredEvents);
       } catch (error) {
-        console.error("Erreur lors du chargement des prestations", error);
+        console.error("Erreur fetch:", error);
+        setValidationMessage({
+          type: 'error',
+          text: 'Erreur lors du chargement des données'
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
-  
-    fetchEvents();
-  }, [selectedCollaborators, selectedServices, currentWeek, filterType, selectedPatrimoine]);
-  
 
+    fetchEvents();
+  }, [selectedCollaborators, selectedServices, currentWeek, filterType, selectedPatrimoine, getStartOfWeek, getEndOfWeek]);
 
   const changeWeek = (direction) => {
     const newDate = new Date(currentWeek);
@@ -127,44 +110,117 @@ const Dashboard = ({ selectedCollaborators, selectedServices, selectedPatrimoine
     setCurrentWeek(getStartOfWeek(newDate));
   };
 
-
   const handleEventClick = (event) => {
     setSelectedEvent(event);
   };
-
 
   const closePopup = () => {
     setSelectedEvent(null);
   };
 
-  
-  const validateEvent = () => {
-    if (selectedEvent) {
-      const updatedEvents = events.map((event) =>
-        event.id === selectedEvent.id ? { ...event, statut: "Validée" } : event
-      );
-      setEvents(updatedEvents);
-      closePopup();
+  const validateEvent = async () => {
+    if (!selectedEvent) return;
+
+    if (selectedEvent.statut === 'Validée') {
+      setValidationMessage({
+        type: 'error',
+        text: 'Cette prestation a déjà été validée.'
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${config.API_BASE_URL}/prestations/${selectedEvent.id}/valider`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors de la validation');
+      }
+
+      const updatedData = await response.json();
+
+      if (updatedData.success) {
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            event.id === selectedEvent.id ? { ...event, statut: 'Validée' } : event
+          )
+        );
+        
+        setValidationMessage({
+          type: 'success',
+          text: 'Prestation validée avec succès !'
+        });
+
+        setTimeout(() => {
+          setValidationMessage(null);
+          closePopup();
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Erreur:', error);
+      setValidationMessage({
+        type: 'error',
+        text: error.message || 'Erreur lors de la validation'
+      });
     }
   };
 
-  
   const getCurrentTimePosition = () => {
     const now = currentTime;
     const hours = now.getHours();
     const minutes = now.getMinutes();
-    return (hours + minutes / 60) * 60; 
+    return (hours + minutes / 60) * 60;
   };
 
-  
   const isToday = (date) => {
     const today = new Date();
     return date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear();
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
   };
 
-  
+  const EventItem = ({ event, onClick }) => {
+    const duration = (new Date(event.date_fin) - new Date(event.date_debut)) / (1000 * 60 * 60) * 80;
+    
+    return (
+      <div
+        className="event"
+        style={{
+          backgroundColor: `${event.distinctcolor}60`,
+          border: `2px solid ${event.distinctcolor}`,
+          height: `${duration}px`,
+        }}
+        onClick={() => onClick(event)}
+      >
+        <div className="event-time-wrapper">
+          <div className="event-time-debut" style={{ backgroundColor: event.distinctcolor }}>
+            {new Date(event.date_debut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </div>
+          <div className="event-time-fin" style={{ backgroundColor: event.distinctcolor }}>
+            {new Date(event.date_fin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        </div>
+        <div className="event-details" style={{ color: event.distinctcolor }}>
+          <div className="event-details-prestation">{event.type_prestation_name}</div>
+          <div className="event-details-patrimoine">{event.id_patrimoine}</div>
+        </div>
+        <div className="event-status">
+          {event.statut === "En cours" && <img src={ClockIcon} alt="En cours" />}
+          {event.statut === "Terminée" && <img src={CheckIcon} alt="Terminée" />}
+          {event.statut === "Validée" && (
+            <>
+              <img src={CheckIcon} alt="Validée" />
+              <img src={CheckIcon} alt="Validée" />
+            </>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderCalendar = () => {
     const days = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
     const hours = Array.from({ length: 24 }, (_, i) => i);
@@ -197,45 +253,24 @@ const Dashboard = ({ selectedCollaborators, selectedServices, selectedPatrimoine
                 date.setDate(date.getDate() + index);
                 const dayEvents = events.filter((event) => {
                   const eventDate = new Date(event.date_debut);
-                  return eventDate.getDate() === date.getDate() && eventDate.getHours() === hour;
+                  return eventDate.getDate() === date.getDate() && 
+                         eventDate.getHours() === hour;
                 });
+                
                 return (
                   <div key={`${day}-${hour}`} className="day-cell">
                     {dayEvents.map((event) => (
-                      <div
+                      <EventItem 
                         key={event.id}
-                        className="event"
-                        style={{
-                          backgroundColor: `${event.distinctcolor}60`,
-                          border: `2px solid ${event.distinctcolor}`,
-                          height: `${(new Date(event.date_fin) - new Date(event.date_debut)) / (1000 * 60 * 60) * 80}px`,
-                        }}
-                        onClick={() => handleEventClick(event)}
-                      >
-                        <div className="event-time-wrapper">
-                          <div className="event-time-debut" style={{ backgroundColor: event.distinctcolor }}>
-                            {new Date(event.date_debut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </div>
-                          <div className="event-time-fin" style={{ backgroundColor: event.distinctcolor }}>
-                            {new Date(event.date_fin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                          </div>
-                        </div>
-                        <div className="event-details" style={{ color: event.distinctcolor }}>
-                          <div className="event-details-prestation">{event.type_prestation_name}</div>
-                          <div className="event-details-patrimoine">{event.id_patrimoine}</div>
-                        </div>
-                        <div className="event-status">
-                          {event.statut === "En cours" && <img src={ClockIcon} alt="En cours" />}
-                          {event.statut === "Terminée" && <img src={CheckIcon} alt="Terminée" />}
-                        </div>
-                      </div>
+                        event={event}
+                        onClick={handleEventClick}
+                      />
                     ))}
                   </div>
                 );
               })}
             </div>
           ))}
-          
           
           {days.some((_, index) => {
             const date = new Date(currentWeek);
@@ -280,41 +315,29 @@ const Dashboard = ({ selectedCollaborators, selectedServices, selectedPatrimoine
           </button>
         </div>
       </div>
-      {renderCalendar()}
 
+      {isLoading ? (
+        <div className="loading">Chargement en cours...</div>
+      ) : (
+        renderCalendar()
+      )}
       
-      <Popup isOpen={selectedEvent !== null} onClose={closePopup} onValidate={validateEvent}>
-        {selectedEvent && (
-          <div>
-            <h2>{selectedEvent.type_prestation_name}</h2>
-            <p>
-              <img src="/icons/calendar-icon.png" alt="Date" className="popup-icon" />
-              {new Date(selectedEvent.date_debut).toLocaleDateString()}
-            </p>
-            <p>
-              <img src="/icons/clock-icon.png" alt="Heure" className="popup-icon" />
-              {new Date(selectedEvent.date_debut).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} - 
-              {new Date(selectedEvent.date_fin).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </p>
-            <p>
-              <img src="/icons/location-icon.png" alt="Adresse" className="popup-icon" />
-              {selectedEvent.adresse || "Adresse non renseignée"}
-            </p>
-            <p>
-              <img src="/icons/id-icon.png" alt="Référence" className="popup-icon" />
-              {selectedEvent.id_patrimoine || "Non renseigné"}
-            </p>
-            <div>
-              <input type="checkbox" id="arrival" />
-              <label htmlFor="arrival">Heure d'arrivée</label>
-            </div>
-            <div>
-              <input type="checkbox" id="departure" />
-              <label htmlFor="departure">Heure de départ</label>
-            </div>
-          </div>
-        )}
-      </Popup>
+      {selectedEvent && (
+        <Popup 
+          event={selectedEvent} 
+          onClose={closePopup} 
+          onValidate={validateEvent} 
+        />
+      )}
+      
+      {validationMessage && (
+        <div 
+          className={`validation-message ${validationMessage.type}`}
+          aria-live="polite"
+        >
+          {validationMessage.text}
+        </div>
+      )}
     </div>
   );
 };

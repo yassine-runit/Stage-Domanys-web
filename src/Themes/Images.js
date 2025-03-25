@@ -12,6 +12,10 @@ const MessageIcon = require("../Assets/img/message.png");
 const CollabIcon = require("../Assets/img/collaborateurs.png");
 const CheckIcon = require("../Assets/img/Check.png");
 const ClockIcon = require("../Assets/img/Clock.png");
+const LocationIcon = require ("../Assets/img/location.png");
+const PatrimoineIcon = require ("../Assets/img/patrimoine.png");
+const heure_arrivee = require ("../Assets/img/arrivée.png");
+const heure_depart = require ("../Assets/img/départ.png");
 
 export{
     LogoImg,
@@ -27,5 +31,9 @@ export{
     MessageIcon,
     CollabIcon,
     CheckIcon,
-    ClockIcon
+    ClockIcon,
+    LocationIcon,
+    PatrimoineIcon,
+    heure_arrivee,
+    heure_depart
 }
