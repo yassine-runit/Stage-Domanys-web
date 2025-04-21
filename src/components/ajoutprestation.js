@@ -11,7 +11,7 @@ const AddPrestationModal = ({ onClose }) => {
         duree: '',
         date_debut: '',
         date_fin: '',
-        est_recurrent: 0,
+        est_recurrent: '0',
         id_chef: '',
         statut: 'Planifiée',
         id_collaborateur: [],
@@ -217,14 +217,14 @@ const AddPrestationModal = ({ onClose }) => {
                             </div>
 
                             <div className="formulaire-groupe">
-                                <label><FiCalendar /> Durée (heures)</label>
+                                <label><FiCalendar /> Durée (minutes)</label>
                                 <input
                                     type="number"
                                     name="duree"
                                     value={formData.duree}
                                     onChange={handleChange}
                                     required
-                                    placeholder="Durée en heures"
+                                    placeholder="Durée en minutes"
                                 />
                             </div>
 
@@ -329,10 +329,10 @@ const AddPrestationModal = ({ onClose }) => {
                                 <label className="checkbox">
                                     <input
                                         type="checkbox"
-                                        checked={formData.est_recurrent === 1}
+                                        checked={formData.est_recurrent === "1"}
                                         onChange={(e) => setFormData(prev => ({ 
                                             ...prev, 
-                                            est_recurrent: e.target.checked ? 1 : 0 
+                                            est_recurrent: e.target.checked ? "1" : "0" 
                                         }))}
                                     />
                                     <span className="checkmark"></span>

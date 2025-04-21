@@ -372,15 +372,21 @@
   }
   
   .validation-message.success {
-    background-color: #4CAF50;
-    color: white;
-    border: 2px solid #45a049;
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 4px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 5px solid #1e7e34;
   }
   
   .validation-message.error {
-    background-color: #f44336;
-    color: white;
-    border: 2px solid #d32f2f;
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 4px;
+    padding: 10px 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-left: 5px solid #bd2130;
   }
   
   @keyframes slideIn {

@@ -284,8 +284,9 @@
 .success-popup {
   padding: 50px 30px;
   font-weight: bold;
-  background-color: #fff;
-  border-top: 5px solid #4BB543;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  
+  
 }
 
 .confirmation-popup {

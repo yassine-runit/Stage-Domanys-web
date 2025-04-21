@@ -1,0 +1,158 @@
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  
+  .popup-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 450px;
+    padding: 24px;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  
+
+  .popup-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .popup-close:hover {
+    color: #333;
+  }
+  
+
+  .popup-content h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 8px;
+    padding-right: 25px;
+  }
+  
+ 
+  .popup-date {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+  }
+  
+
+  .popup-section {
+    display: flex;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  
+ 
+  .popup-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 16px;
+  }
+  
+  .popup-icon img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+  
+ 
+  .popup-details {
+    flex: 1;
+  }
+  
+
+  .popup-details h3 {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    margin: 0 0 4px 0;
+  }
+  
+
+  .popup-details p {
+    font-size: 16px;
+    color: #333;
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+
+  .popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+  }
+  
+ 
+  .popup-actions button {
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+
+  .popup-cancel {
+    background-color: #ffffff;
+    color: #004797;
+    border: 1px solid #004797;
+  }
+  
+ 
+  
+ 
+  .popup-validate {
+    background-color: #004797;
+    color: white;
+    border: none;
+  }
+  
+  
+  
+  .popup-validate:disabled {
+    background-color: #cccccc;
+    color: #888888;
+    cursor: not-allowed;
+  }
+  
+  

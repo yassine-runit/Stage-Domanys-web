@@ -1,5 +1,6 @@
 import React from 'react';
 import {  PatrimoineIcon, LocationIcon, heure_arrivee, heure_depart} from "../Themes/Images";
+import "../styles/popup.css";
 
 const EventPopup = ({ event, onClose, onValidate }) => {
   const formatDate = (dateString) => {

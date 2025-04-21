@@ -86,23 +86,24 @@ const Sidebar = ({ onFilterChange }) => {
                             Mes collaborateurs
                         </h3>
                         <div className="sidebar-items-container">
-                            {collaborators.map(collab => (
-                                <label 
-                                    key={collab.id} 
-                                    className={`sidebar-item ${selectedCollaborators.includes(collab.id) ? 'checked' : ''}`}
-                                    style={{ color: selectedCollaborators.includes(collab.id) ? collab.distinctcolor || "#004797" : "inherit" }}
-                                >
-                                    <div className="checkbox-container">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={selectedCollaborators.includes(collab.id)}
-                                            onChange={() => handleCollaboratorChange(collab.id)} 
-                                            style={{ accentColor: collab.distinctcolor || "#004797" }}
-                                        />
-                                    </div>
-                                    <span className="item-label">{collab.firstname} {collab.lastname}</span>
-                                </label>
-                            ))}
+                        {Array.isArray(collaborators) && collaborators.map(collab => (
+                            <label 
+                                key={collab.id} 
+                                className={`sidebar-item ${selectedCollaborators.includes(collab.id) ? 'checked' : ''}`}
+                                style={{ color: selectedCollaborators.includes(collab.id) ? collab.distinctcolor || "#004797" : "inherit" }}
+                            >
+                                <div className="checkbox-container">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectedCollaborators.includes(collab.id)}
+                                        onChange={() => handleCollaboratorChange(collab.id)} 
+                                        style={{ accentColor: collab.distinctcolor || "#004797" }}
+                                    />
+                                </div>
+                                <span className="item-label">{collab.firstname} {collab.lastname}</span>
+                            </label>
+                        ))}
+
                         </div>
                     </div>
 
@@ -112,21 +113,22 @@ const Sidebar = ({ onFilterChange }) => {
                             Mes prestations
                         </h3>
                         <div className="sidebar-items-container">
-                            {services.map(service => (
-                                <label 
-                                    key={service.id} 
-                                    className={`sidebar-item ${selectedServices.includes(service.id) ? 'checked' : ''}`}
-                                >
-                                    <div className="checkbox-container">
-                                        <input 
-                                            type="checkbox" 
-                                            checked={selectedServices.includes(service.id)}
-                                            onChange={() => handleServiceChange(service.id)} 
-                                        />
-                                    </div>
-                                    <span className="item-label">{service.name}</span>
-                                </label>
-                            ))}
+                        {Array.isArray(services) && services.map(service => (
+                            <label 
+                                key={service.id} 
+                                className={`sidebar-item ${selectedServices.includes(service.id) ? 'checked' : ''}`}
+                            >
+                                <div className="checkbox-container">
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectedServices.includes(service.id)}
+                                        onChange={() => handleServiceChange(service.id)} 
+                                    />
+                                </div>
+                                <span className="item-label">{service.name}</span>
+                            </label>
+                        ))}
+
                         </div>
                     </div>
                 </>

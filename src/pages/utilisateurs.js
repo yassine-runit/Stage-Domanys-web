@@ -307,7 +307,7 @@ const Utilisateurs = () => {
         <div className="header-right">
           <h1>Utilisateurs</h1>
           <button className="btn-add" onClick={() => setShowAddPopup(true)}>
-            <span className="btn-add-icon">+</span> Ajouter un utulisateur
+            <span className="btn-add-icon">+</span> Ajouter un utilisateur
           </button>
         </div>
           
