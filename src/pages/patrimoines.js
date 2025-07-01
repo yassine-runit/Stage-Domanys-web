@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import "../styles/patrimoines.css";  
+import "../styles/patrimoines.css";
 import config from '../config';
 import { useNavigate } from 'react-router-dom';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 const Patrimoines = () => {
   const [patrimoines, setPatrimoines] = useState([]);
@@ -16,6 +17,9 @@ const Patrimoines = () => {
   const [showSuccessDeletePopup, setShowSuccessDeletePopup] = useState(false);
   const [showAddPopup, setShowAddPopup] = useState(false);
   const [agences, setAgences] = useState([]);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [selectedPatrimoine, setSelectedPatrimoine] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [newPatrimoineData, setNewPatrimoineData] = useState({
     refpat: '',
     nature: '',
@@ -32,7 +36,8 @@ const Patrimoines = () => {
     uptakevalue: '',
     gazclass: '',
     gazvalue: '',
-    agencyid: ''
+    agencyid: '',
+    active: true
   });
 
   const navigate = useNavigate();
@@ -46,7 +51,7 @@ const Patrimoines = () => {
     try {
       const response = await fetch(`${config.API_BASE_URL}/agences/all`);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       const data = await response.json();
       setAgences(data);
     } catch (error) {
@@ -60,7 +65,7 @@ const Patrimoines = () => {
     try {
       const response = await fetch(`${config.API_BASE_URL}/patrimoines/all`);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       const data = await response.json();
       setPatrimoines(data);
     } catch (error) {
@@ -78,30 +83,40 @@ const Patrimoines = () => {
     setSearchTerm('');
   };
 
-  const filteredPatrimoines = patrimoines.filter(patrimoine => 
-    patrimoine.refpat?.toLowerCase().includes(searchTerm.toLowerCase()) 
+  const filteredPatrimoines = patrimoines.filter(patrimoine =>
+    patrimoine.refpat?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patrimoine.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = async (id) => {
-    setConfirmation({
-      message: 'Êtes-vous sûr de vouloir supprimer ce patrimoine ?',
-      onConfirm: async () => {
-        if (!id) return;
-        setIsLoading(true);
-        try {
-          await fetch(`${config.API_BASE_URL}/patrimoines/delete/${id}`, { method: 'DELETE' });
-          await fetchPatrimoines();
-          setConfirmation(null);
-          setShowSuccessDeletePopup(true);
-          setTimeout(() => setShowSuccessDeletePopup(false), 2000);
-        } catch (error) {
-          setError('Erreur lors de la suppression du patrimoine');
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      onCancel: () => setConfirmation(null)
-    });
+  const handleDeleteClick = (patrimoine) => {
+    setSelectedPatrimoine(patrimoine);
+    setShowConfirmDelete(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedPatrimoine) return;
+
+    try {
+      setDeleteLoading(true);
+      const response = await fetch(`${config.API_BASE_URL}/patrimoines/delete/${selectedPatrimoine.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+
+      setPatrimoines(patrimoines.filter(p => p.id !== selectedPatrimoine.id));
+      setShowConfirmDelete(false);
+      setSelectedPatrimoine(null);
+      setShowSuccessDeletePopup(true);
+      setTimeout(() => setShowSuccessDeletePopup(false), 2000);
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError('Erreur lors de la suppression du patrimoine');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleEdit = (index, patrimoine) => {
@@ -199,10 +214,10 @@ const Patrimoines = () => {
         uptakevalue: '',
         gazclass: '',
         gazvalue: '',
-        agencyid: ''
+        agencyid: '',
+        active: true
       });
-      
-      
+
       setShowSuccessEditPopup(true);
       setTimeout(() => setShowSuccessEditPopup(false), 2000);
     } catch (error) {
@@ -219,26 +234,20 @@ const Patrimoines = () => {
   return (
     <div className="patrimoines-container">
       <div className="patrimoines-header">
-        
-        
-
-        
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Rechercher..." 
-            value={searchTerm} 
-            onChange={handleSearch} 
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            value={searchTerm}
+            onChange={handleSearch}
           />
           {searchTerm && (
             <button className="btn-clear-search" onClick={clearSearch}>
               ×
             </button>
           )}
-          
         </div>
 
-        
         <div className="header-right">
           <h1>Patrimoines</h1>
           <button className="btn-add" onClick={() => setShowAddPopup(true)}>
@@ -247,21 +256,23 @@ const Patrimoines = () => {
         </div>
       </div>
 
-        {error && <div className="error-message">{error}</div>}
-        {isLoading && <div className="loading">Chargement en cours...</div>}
+      {error && <div className="error-message">{error}</div>}
+      {isLoading && <div className="loading">Chargement en cours...</div>}
 
-        <div className="patrimoines-list">
-            {filteredPatrimoines.length > 0 ? (
-            filteredPatrimoines.map((patrimoine, index) => (
-                <div key={index} className="patrimoine-item">
-                <div className="patrimoine-info">
-                    <span className="refpat">{patrimoine.refpat}</span>
-                    <span className="nature">{patrimoine.nature}</span>
-                </div>
-                <div className="patrimoine-actions">
-                    <button className="btn-edit" onClick={() => handleEdit(index, patrimoine)} disabled={isLoading}>Modifier</button>
-                    <button className="btn-delete" onClick={() => handleDelete(patrimoine._id || patrimoine.id)} disabled={isLoading}>Supprimer</button>
-                </div>
+      <div className="patrimoines-list">
+        {filteredPatrimoines.length > 0 ? (
+          filteredPatrimoines.map((patrimoine, index) => (
+            <div key={index} className="patrimoine-item">
+              <div className="patrimoine-info">
+                <span className="refpat">{patrimoine.refpat}</span>
+                <span className="nature">{patrimoine.nature}</span>
+                <span className="address">{patrimoine.streetnumber} {patrimoine.streetname}</span>
+                <span className="city">{patrimoine.postalcode} {patrimoine.city}</span>
+              </div>
+              <div className="patrimoine-actions">
+                <button className="btn-edit" onClick={() => handleEdit(index, patrimoine)} disabled={isLoading}>Modifier</button>
+                <button className="btn-delete" onClick={() => handleDeleteClick(patrimoine)} disabled={isLoading}>Supprimer</button>
+              </div>
 
               {editingIndex === index && (
                 <div className="edit-form-container">
@@ -328,10 +339,10 @@ const Patrimoines = () => {
                     </div>
                     <div className="form-group">
                       <label>Agence:</label>
-                      <select 
-                        name="agencyid" 
-                        value={formData.agencyid} 
-                        onChange={handleInputChange} 
+                      <select
+                        name="agencyid"
+                        value={formData.agencyid}
+                        onChange={handleInputChange}
                         required
                       >
                         <option value="">Sélectionnez une agence</option>
@@ -349,17 +360,21 @@ const Patrimoines = () => {
                   </form>
                 </div>
               )}
-                    </div>
-            ))
-            ) : <div className="no-results">Aucun patrimoine trouvé</div>}
-        </div>
+            </div>
+          ))
+        ) : <div className="no-results">Aucun patrimoine trouvé</div>}
+      </div>
 
       {confirmation && (
-        <div className="confirmation-popup">
-          <p>{confirmation.message}</p>
-          <button className="confirm-btn" onClick={confirmation.onConfirm}>Oui</button>
-          <button className="cancel-btn" onClick={confirmation.onCancel}>Non</button>
-        </div>
+        <DeleteConfirmationModal
+          isOpen={!!confirmation}
+          onClose={confirmation.onCancel}
+          onConfirm={confirmation.onConfirm}
+          title="Confirmer la modification"
+          message={confirmation.message}
+          loading={isLoading}
+          confirmButtonText={isLoading ? "Enregistrement..." : "Confirmer"}
+        />
       )}
 
       {showSuccessEditPopup && (
@@ -442,10 +457,10 @@ const Patrimoines = () => {
                 </div>
                 <div className="form-group">
                   <label>Agence:</label>
-                  <select 
-                    name="agencyid" 
-                    value={newPatrimoineData.agencyid} 
-                    onChange={handleNewPatrimoineInputChange} 
+                  <select
+                    name="agencyid"
+                    value={newPatrimoineData.agencyid}
+                    onChange={handleNewPatrimoineInputChange}
                     required
                   >
                     <option value="">Sélectionnez une agence</option>
@@ -469,6 +484,18 @@ const Patrimoines = () => {
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        isOpen={showConfirmDelete}
+        onClose={() => {
+          setShowConfirmDelete(false);
+          setSelectedPatrimoine(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmer la suppression"
+        message={`Êtes-vous sûr de vouloir supprimer le patrimoine ${selectedPatrimoine?.refpat || ''} ?`}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

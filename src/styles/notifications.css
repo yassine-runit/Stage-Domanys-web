@@ -1,0 +1,494 @@
+/* notifications.css */
+
+/* Conteneur principal */
+.notifications-container {
+  padding: 20px;
+  width: 100%;
+  width: 1170px;
+  margin-top: 20px;
+  margin-left: 10px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.notifications-container h1 {
+  font-size: 24px;
+  color: #333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.notifications-container h2 {
+  color: #343a40;
+  margin-bottom: 16px;
+  font-weight: 500;
+  font-size: 20px;
+}
+
+/* En-tête */
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  border-bottom: 1px solid #eaeaea;
+  gap:16px
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.notifications-header>div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Bouton d'ajout */
+.add-notification-btn {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background-color: #004797;
+  color: white;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 71, 151, 0.2);
+}
+
+.add-notification-btn:hover {
+  background-color: #003b7a;
+  transform: translateY(-2px);
+}
+
+.add-notification-btn-icon {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+/* Modal de formulaire */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 850px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 30px;
+  position: relative;
+  z-index: 1001;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeef5;
+}
+
+.modal-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #004797;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #7f8c8d;
+  font-size: 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.close-btn:hover {
+  color: #e74c3c;
+  background: #f5f5f5;
+}
+
+/* Formulaire */
+.notification-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group.full-width {
+  width: 100%;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #004797;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notification-form input[type="text"],
+.notification-form textarea,
+.date-picker-input {
+  padding: 12px 15px;
+  border: 1px solid #c4cad4;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.notification-form input[type="text"]:focus,
+.notification-form textarea:focus,
+.date-picker-input:focus {
+  outline: none;
+  border-color: #004797;
+  box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.1);
+}
+
+.notification-form textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* Tableau des notifications */
+.notifications-list-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  margin-top: 24px;
+}
+
+.notifications-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 20px;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.notifications-table th,
+.notifications-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.notifications-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.notifications-table tr:last-child td {
+  border-bottom: none;
+}
+
+.notifications-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Badges de statut */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  opacity: 0.9;
+}
+
+.status-badge.programmee {
+  background-color: #004797;
+}
+
+.status-badge.envoyee {
+  background-color: #23A638;
+}
+
+.status-badge.echec {
+  background-color: #EA518E;
+}
+
+/* Recherche de collaborateurs */
+.collaborator-search-container {
+  position: relative;
+  margin-top: 5px;
+}
+
+.search-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input-container input {
+  width: 100%;
+  padding: 12px 15px 12px 40px !important ;
+  border: 1px solid #c4cad4;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.search-input-container input:focus {
+  border-color: #004797;
+  box-shadow: 0 0 0 3px rgba(0, 71, 151, 0.1);
+}
+
+.search {
+  position: absolute;
+  left: 15px;
+  color: #7f8c8d;
+  font-size: 18px;
+}
+
+.collaborators-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #c4cad4;
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+  z-index: 10;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.collaborator-option {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: white;
+}
+
+.selected-collaborators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.selected-collaborator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  transition: all 0.3s ease;
+  background-color: #4a6cf7;
+}
+
+.selected-collaborator:hover {
+  transform: scale(1.05);
+}
+
+.remove-collaborator {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.remove-collaborator:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Boutons d'action */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eaeef5;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background-color: #f1f5f9;
+  color: #004797;
+  border: 1px solid #004797;
+}
+
+.btn-submit {
+  background-color: #004797;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #e2e8f0;
+}
+
+.btn-submit:hover {
+  background-color: #003466;
+}
+
+
+
+/* Messages d'erreur et de succès */
+.error-message {
+  color: #e03131;
+  background-color: #ffe3e3;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  border-left: 4px solid #e03131;
+}
+
+.success-message {
+  color: #23A638;
+  background-color: #e3f9e5;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  border-left: 4px solid #23A638;
+}
+
+/* Popup de succès */
+.success-popUp {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+}
+
+.success-popUp-inner {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  transform: scale(0.7);
+  opacity: 0;
+  animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.success-popUp-icon {
+  width: 80px;
+  height: 80px;
+  background: #004797;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 10px 20px rgba(0, 71, 151, 0.3);
+}
+
+.success-popUp-icon svg {
+  color: white;
+  font-size: 50px;
+}
+
+.success-popUp-inner h3 {
+  color: #2c3e50;
+  margin-bottom: 0;
+  font-size: 22px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+

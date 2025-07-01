@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import "../styles/agences.css";  
+import "../styles/agences.css";
 import config from '../config';
 import { useNavigate } from 'react-router-dom';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 const Agences = () => {
   const [agences, setAgences] = useState([]);
@@ -26,6 +27,9 @@ const Agences = () => {
     fax: '',
     email: ''
   });
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [selectedAgence, setSelectedAgence] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -39,7 +43,7 @@ const Agences = () => {
     try {
       const response = await fetch(`${config.API_BASE_URL}/agences/all`);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       const data = await response.json();
       setAgences(data);
     } catch (error) {
@@ -57,36 +61,43 @@ const Agences = () => {
     setSearchTerm('');
   };
 
-  const filteredAgences = agences.filter(agence => 
-    agence.name?.toLowerCase().includes(searchTerm.toLowerCase()) 
+  const filteredAgences = agences.filter(agence =>
+    agence.name?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = async (id) => {
-    setConfirmation({
-      message: 'Êtes-vous sûr de vouloir supprimer cette agence ?',
-      onConfirm: async () => {
-        if (!id) return;
-        setIsLoading(true);
-        try {
-          await fetch(`${config.API_BASE_URL}/agences/delete/${id}`, { method: 'DELETE' });
-          await fetchAgences();
-          setConfirmation(null);
-          setShowSuccessDeletePopup(true);
-          setTimeout(() => setShowSuccessDeletePopup(false), 2000);
-        } catch (error) {
-          setError('Erreur lors de la suppression de l\'agence');
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      onCancel: () => setConfirmation(null)
-    });
+  const handleDeleteClick = (agence) => {
+    setSelectedAgence(agence);
+    setShowConfirmDelete(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedAgence) return;
+
+    try {
+      setDeleteLoading(true);
+      const response = await fetch(`${config.API_BASE_URL}/agences/delete/${selectedAgence.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+
+      setAgences(agences.filter(a => a.id !== selectedAgence.id));
+      setShowConfirmDelete(false);
+      setSelectedAgence(null);
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError('Erreur lors de la suppression de l\'agence');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleEdit = (index, agence) => {
     setEditingIndex(index);
-    
-    
+
+
     const completeFormData = {
       agencynumber: agence.agencynumber || '',
       code: agence.code || '',
@@ -98,9 +109,9 @@ const Agences = () => {
       fax: agence.fax || '',
       email: agence.email || ''
     };
-    
+
     setFormData(completeFormData);
-    setOriginalData({...completeFormData});
+    setOriginalData({ ...completeFormData });
   };
 
   const handleInputChange = (e) => {
@@ -187,7 +198,7 @@ const Agences = () => {
         fax: '',
         email: ''
       });
-      
+
       setShowSuccessEditPopup(true);
       setTimeout(() => setShowSuccessEditPopup(false), 2000);
     } catch (error) {
@@ -204,15 +215,15 @@ const Agences = () => {
   return (
     <div className="agences-container">
       <div className="agences-header">
-        
 
-        
+
+
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Rechercher..." 
-            value={searchTerm} 
-            onChange={handleSearch} 
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            value={searchTerm}
+            onChange={handleSearch}
           />
           {searchTerm && (
             <button className="btn-clear-search" onClick={clearSearch}>
@@ -221,7 +232,7 @@ const Agences = () => {
           )}
         </div>
 
-        
+
         <div className="header-right">
           <h1>Agences</h1>
           <button className="btn-add" onClick={() => setShowAddPopup(true)}>
@@ -243,7 +254,7 @@ const Agences = () => {
               </div>
               <div className="agence-actions">
                 <button className="btn-edit" onClick={() => handleEdit(index, agence)} disabled={isLoading}>Modifier</button>
-                <button className="btn-delete" onClick={() => handleDelete(agence._id || agence.id)} disabled={isLoading}>Supprimer</button>
+                <button className="btn-delete" onClick={() => handleDeleteClick(agence)} disabled={isLoading}>Supprimer</button>
               </div>
 
               {editingIndex === index && (
@@ -298,11 +309,15 @@ const Agences = () => {
       </div>
 
       {confirmation && (
-        <div className="confirmation-popup">
-          <p>{confirmation.message}</p>
-          <button className="confirm-btn" onClick={confirmation.onConfirm}>Oui</button>
-          <button className="cancel-btn" onClick={confirmation.onCancel}>Non</button>
-        </div>
+        <DeleteConfirmationModal
+          isOpen={!!confirmation}
+          onClose={confirmation.onCancel}
+          onConfirm={confirmation.onConfirm}
+          title="Confirmer la modification"
+          message={confirmation.message}
+          loading={isLoading}
+          confirmButtonText={isLoading ? "Enregistrement..." : "Confirmer"}
+        />
       )}
 
       {showSuccessEditPopup && (
@@ -372,6 +387,18 @@ const Agences = () => {
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        isOpen={showConfirmDelete}
+        onClose={() => {
+          setShowConfirmDelete(false);
+          setSelectedAgence(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmer la suppression"
+        message={`Êtes-vous sûr de vouloir supprimer l'agence ${selectedAgence?.name || ''} ?`}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

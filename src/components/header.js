@@ -3,20 +3,20 @@ import { jwtDecode } from "jwt-decode";
 import { Link, useLocation } from "react-router-dom";
 import "../styles/header.css";
 import config from '../config';
-import { 
-  FiCalendar, 
-  FiUsers, 
-  FiBriefcase, 
-  FiMap, 
-  FiBell, 
-  FiMessageSquare,  
+import {
+  FiCalendar,
+  FiUsers,
+  FiBriefcase,
+  FiMap,
+  FiBell,
+  FiAlertCircle,
   FiLogOut,
   FiChevronDown,
   FiSearch,
   FiX
 } from "react-icons/fi";
 
-const Header = ({ onFilterChange }) => {
+const Header = ({ onFilterChange, selectedCollaborators = [], selectedServices = [] }) => {
   const [user, setUser] = useState({ firstname: "", lastname: "" });
   const [patrimoines, setPatrimoines] = useState([]);
   const [selectedPatrimoine, setSelectedPatrimoine] = useState(null);
@@ -26,7 +26,7 @@ const Header = ({ onFilterChange }) => {
   const dropdownRef = useRef(null);
   const userMenuRef = useRef(null);
   const location = useLocation();
-  
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -36,12 +36,12 @@ const Header = ({ onFilterChange }) => {
         setShowUserMenu(false);
       }
     }
-    
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  
+
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
     if (storedToken) {
@@ -58,7 +58,7 @@ const Header = ({ onFilterChange }) => {
     fetchPatrimoines();
   }, []);
 
-  
+
   const fetchPatrimoines = async () => {
     try {
       const response = await fetch(`${config.API_BASE_URL}/patrimoines/all`);
@@ -73,26 +73,26 @@ const Header = ({ onFilterChange }) => {
     }
   };
 
- 
+
   const handlePatrimoineSelect = (patrimoine) => {
     setSelectedPatrimoine(patrimoine);
     setShowDropdown(false);
-   
-    onFilterChange([], [], patrimoine);
+
+    onFilterChange(selectedCollaborators, selectedServices, patrimoine);
   };
 
 
   const clearPatrimoineFilter = () => {
     setSelectedPatrimoine(null);
-    onFilterChange([], [], null);
+    onFilterChange(selectedCollaborators, selectedServices, null);
   };
 
-  
+
   const filteredPatrimoines = patrimoines.filter((patrimoine) =>
     String(patrimoine.id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  
+
   const navItems = [
     { icon: <FiCalendar />, label: "Calendrier", path: "/dashboard" },
     { icon: <FiBriefcase />, label: "Agences", path: "/agences" },
@@ -100,13 +100,13 @@ const Header = ({ onFilterChange }) => {
     { icon: <FiUsers />, label: "Utilisateurs", path: "/utilisateurs" },
   ];
 
-  
+
   const userMenuItems = [
     { icon: <FiBell />, label: "Notifications", path: "/notifications" },
-    { icon: <FiMessageSquare />, label: "Messages", path: "/messages" },
-    { 
-      icon: <FiLogOut />, 
-      label: "Déconnexion", 
+    { icon: <FiAlertCircle />, label: "Réclamations", path: "/réclamations" },
+    {
+      icon: <FiLogOut />,
+      label: "Déconnexion",
       action: () => {
         localStorage.removeItem("token");
         window.location.replace("/login");
@@ -117,13 +117,13 @@ const Header = ({ onFilterChange }) => {
   return (
     <div className="header">
       <div className="header-left">
-        
+
         <nav className="nav-menu">
           {navItems.map((item, index) => (
-            <Link 
-              key={index} 
-              to={item.path} 
-              className={`nav-item ${location.pathname === item.path ? 'active' : ''}`} 
+            <Link
+              key={index}
+              to={item.path}
+              className={`nav-item ${location.pathname === item.path ? 'active' : ''}`}
             >
               <span className="nav-icon">{item.icon}</span>
               <span className="nav-label">{item.label}</span>
@@ -133,20 +133,20 @@ const Header = ({ onFilterChange }) => {
       </div>
 
       <div className="header-right">
-        
+
         <div className="patrimoine-filter" ref={dropdownRef}>
-          <div 
+          <div
             className="patrimoine-selector"
             onClick={() => setShowDropdown(!showDropdown)}
           >
             <span>
-              {selectedPatrimoine 
-                ? `Patrimoine: ${selectedPatrimoine.id}` 
+              {selectedPatrimoine
+                ? `Patrimoine: ${selectedPatrimoine.id}`
                 : "Choisir un patrimoine"}
             </span>
             <FiChevronDown className="dropdown-icon" />
           </div>
-          
+
           {selectedPatrimoine && (
             <button
               className="clear-filter-btn"
@@ -158,7 +158,7 @@ const Header = ({ onFilterChange }) => {
               <FiX />
             </button>
           )}
-          
+
           {showDropdown && (
             <div className="patrimoine-dropdown">
               <div className="search-container">
@@ -171,10 +171,10 @@ const Header = ({ onFilterChange }) => {
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
-              
+
               <div className="patrimoine-list">
-                
-                
+
+
                 {filteredPatrimoines.length > 0 ? (
                   filteredPatrimoines.map((patrimoine) => (
                     <div
@@ -193,9 +193,9 @@ const Header = ({ onFilterChange }) => {
           )}
         </div>
 
-       
+
         <div className="user-profile" ref={userMenuRef}>
-          <div 
+          <div
             className="user-profile-toggle"
             onClick={() => setShowUserMenu(!showUserMenu)}
           >
@@ -206,12 +206,12 @@ const Header = ({ onFilterChange }) => {
             <span className="user-name">{user.firstname} {user.lastname}</span>
             <FiChevronDown className="dropdown-icon" />
           </div>
-          
+
           {showUserMenu && (
             <div className="user-dropdown">
               {userMenuItems.map((item, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className="user-menu-item"
                   onClick={(e) => {
                     e.preventDefault();

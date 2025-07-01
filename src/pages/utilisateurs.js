@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import "../styles/utilisateurs.css";  
+import "../styles/utilisateurs.css";
 import config from '../config';
 import { useNavigate } from 'react-router-dom';
 import { ShowIcon, HideIcon } from "../Themes/Images";
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 const Utilisateurs = () => {
   const [utilisateurs, setUtilisateurs] = useState([]);
@@ -31,24 +32,27 @@ const Utilisateurs = () => {
     active: true,
     distinctcolor: '#ffffff'
   });
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [selectedUtilisateur, setSelectedUtilisateur] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const navigate = useNavigate();
-  
- 
+
+
   const civilityOptions = ['Mr.', 'Mme.'];
   const roleOptions = ['GTI', 'DAF', 'Collab'];
 
   useEffect(() => {
-    
+
     const storedUserRole = localStorage.getItem("userRole");
     if (storedUserRole) {
       setUserRole(storedUserRole);
     }
-    
+
     fetchAgences();
-    
+
     fetchUtilisateurs(storedUserRole);
-    
+
     console.log("Rôle de l'utilisateur connecté:", storedUserRole);
   }, []);
 
@@ -56,7 +60,7 @@ const Utilisateurs = () => {
     try {
       const response = await fetch(`${config.API_BASE_URL}/agences/all`);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       const data = await response.json();
       setAgences(data);
     } catch (error) {
@@ -68,26 +72,26 @@ const Utilisateurs = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Si l'utilisateur est admin, récupérer tous les utilisateurs
-      const endpoint = role === 'Admin' || role === 'admin' || role === 'ADMIN' 
-        ? `${config.API_BASE_URL}/users/all` 
+      
+      const endpoint = role === 'Admin' || role === 'admin' || role === 'ADMIN'
+        ? `${config.API_BASE_URL}/users/all`
         : `${config.API_BASE_URL}/users/collab/all`;
-      
+
       console.log("Endpoint utilisé:", endpoint);
-      
+
       const response = await fetch(endpoint);
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-      
+
       const data = await response.json();
-      
-      // Normalize data to handle API field differences
+
+    
       const normalizedData = data.map(user => ({
         ...user,
         civility: user.civility || user.civility,
         active: user.active !== undefined ? user.active : true,
         distinctcolor: user.distinctcolor || '#ffffff'
       }));
-      
+
       setUtilisateurs(normalizedData);
     } catch (error) {
       setError('Erreur lors du chargement des utilisateurs');
@@ -105,32 +109,41 @@ const Utilisateurs = () => {
     setSearchTerm('');
   };
 
-  const filteredUsers = utilisateurs.filter(user => 
-    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+  const filteredUsers = utilisateurs.filter(user =>
+    user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.lastname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.firstname?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleDelete = async (id) => {
-    setConfirmation({
-      message: 'Êtes-vous sûr de vouloir supprimer cet utilisateur ?',
-      onConfirm: async () => {
-        if (!id) return;
-        setIsLoading(true);
-        try {
-          await fetch(`${config.API_BASE_URL}/users/delete/${id}`, { method: 'DELETE' });
-          await fetchUtilisateurs(userRole);
-          setConfirmation(null);
-          setShowSuccessDeletePopup(true);
-          setTimeout(() => setShowSuccessDeletePopup(false), 2000);
-        } catch (error) {
-          setError('Erreur lors de la suppression de l\'utilisateur');
-        } finally {
-          setIsLoading(false);
-        }
-      },
-      onCancel: () => setConfirmation(null)
-    });
+  const handleDeleteClick = (utilisateur) => {
+    setSelectedUtilisateur(utilisateur);
+    setShowConfirmDelete(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedUtilisateur) return;
+
+    try {
+      setDeleteLoading(true);
+      const response = await fetch(`${config.API_BASE_URL}/users/delete/${selectedUtilisateur._id || selectedUtilisateur.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la suppression');
+      }
+
+      setUtilisateurs(utilisateurs.filter(u => u._id !== selectedUtilisateur._id && u.id !== selectedUtilisateur.id));
+      setShowConfirmDelete(false);
+      setSelectedUtilisateur(null);
+      setShowSuccessDeletePopup(true);
+      setTimeout(() => setShowSuccessDeletePopup(false), 2000);
+    } catch (error) {
+      console.error('Erreur:', error);
+      setError('Erreur lors de la suppression de l\'utilisateur');
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleEdit = (index, user) => {
@@ -176,15 +189,15 @@ const Utilisateurs = () => {
         try {
           const dataToSend = {};
           Object.keys(formData).forEach(key => {
-           
+
             if (key === 'password' && !formData[key]) return;
-            
-           
+
+
             if (typeof formData[key] === 'boolean') {
               dataToSend[key] = formData[key];
               return;
             }
-            
+
             if (formData[key] !== originalData[key] && formData[key] !== "") {
               dataToSend[key] = formData[key];
             }
@@ -224,7 +237,7 @@ const Utilisateurs = () => {
 
     try {
       const dataToSend = { ...newUtilisateurData };
-      
+
       const response = await fetch(`${config.API_BASE_URL}/users/ajout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -248,7 +261,7 @@ const Utilisateurs = () => {
         active: true,
         distinctcolor: '#ffffff'
       });
-      
+
       setShowSuccessEditPopup(true);
       setTimeout(() => setShowSuccessEditPopup(false), 2000);
     } catch (error) {
@@ -262,17 +275,17 @@ const Utilisateurs = () => {
     setEditingIndex(-1);
   };
 
-  
+
   const getFilteredRoleOptions = () => {
     console.log("Current user role:", userRole);
-    
-    
+
+
     if (userRole === 'Admin' || userRole === 'admin' || userRole === 'ADMIN') {
       return roleOptions; // Return all roles for Admin
     } else if (userRole === 'GTI' || userRole === 'DAF') {
       return ['Collab'];
     }
-    return ['Collab']; 
+    return ['Collab'];
   };
 
   const togglePasswordVisibility = () => {
@@ -286,16 +299,16 @@ const Utilisateurs = () => {
   return (
     <div className="utilisateurs-container">
       <div className="utilisateurs-header">
-        
-        
 
-        
+
+
+
         <div className="search-bar">
-          <input 
-            type="text" 
-            placeholder="Rechercher..." 
-            value={searchTerm} 
-            onChange={handleSearch} 
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            value={searchTerm}
+            onChange={handleSearch}
           />
           {searchTerm && (
             <button className="btn-clear-search" onClick={clearSearch}>
@@ -303,16 +316,16 @@ const Utilisateurs = () => {
             </button>
           )}
         </div>
-        
+
         <div className="header-right">
           <h1>Utilisateurs</h1>
           <button className="btn-add" onClick={() => setShowAddPopup(true)}>
             <span className="btn-add-icon">+</span> Ajouter un utilisateur
           </button>
         </div>
-          
-          
-        
+
+
+
       </div>
 
       {error && <div className="error-message">{error}</div>}
@@ -327,11 +340,11 @@ const Utilisateurs = () => {
                 <span className="firstname">{user.firstname}</span>
                 <span className="lastname">{user.lastname}</span>
                 <span className="role">{user.role}</span>
-                
+
               </div>
               <div className="user-actions">
                 <button className="btn-edit" onClick={() => handleEdit(index, user)} disabled={isLoading}>Modifier</button>
-                <button className="btn-delete" onClick={() => handleDelete(user._id || user.id)} disabled={isLoading}>Supprimer</button>
+                <button className="btn-delete" onClick={() => handleDeleteClick(user)} disabled={isLoading}>Supprimer</button>
               </div>
 
               {editingIndex === index && (
@@ -351,16 +364,16 @@ const Utilisateurs = () => {
                       <input type="text" name="username" value={formData.username} onChange={handleInputChange} required />
                     </div>
                     <div className="form-group password-field">
-                      <label>Mot de passe (laisser vide pour ne pas modifier):</label>
+                      <label>Mot de passe:</label>
                       <div className="password-input-container">
-                        <input 
-                          type={showPassword ? "text" : "password"} 
-                          name="password" 
-                          value={formData.password || ''} 
-                          onChange={handleInputChange} 
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          name="password"
+                          value={formData.password || ''}
+                          onChange={handleInputChange}
                         />
                         <span className="password-toggle" onClick={togglePasswordVisibility}>
-                          {showPassword ? <img src={HideIcon} alt="Hide" className="hide-icon" /> : <img src={ShowIcon} alt="Show" className="show-icon" />}
+                          {showPassword ? <img src={HideIcon} alt="Hide" className="hideIcon" /> : <img src={ShowIcon} alt="Show" className="showIcon" />}
                         </span>
                       </div>
                     </div>
@@ -374,10 +387,10 @@ const Utilisateurs = () => {
                     </div>
                     <div className="form-group">
                       <label>Agence:</label>
-                      <select 
-                        name="agencyid" 
-                        value={formData.agencyid} 
-                        onChange={handleInputChange} 
+                      <select
+                        name="agencyid"
+                        value={formData.agencyid}
+                        onChange={handleInputChange}
                         required
                       >
                         <option value="">Sélectionnez une agence</option>
@@ -390,10 +403,10 @@ const Utilisateurs = () => {
                     </div>
                     <div className="form-group">
                       <label>Rôle:</label>
-                      <select 
-                        name="role" 
-                        value={formData.role} 
-                        onChange={handleInputChange} 
+                      <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleInputChange}
                         required
                       >
                         <option value="">Sélectionnez un rôle</option>
@@ -404,21 +417,21 @@ const Utilisateurs = () => {
                     </div>
                     <div className="form-group">
                       <label>Couleur distinctive:</label>
-                      <input 
-                        type="color" 
-                        name="distinctcolor" 
-                        value={formData.distinctcolor || '#ffffff'} 
-                        onChange={handleColorChange} 
+                      <input
+                        type="color"
+                        name="distinctcolor"
+                        value={formData.distinctcolor || '#ffffff'}
+                        onChange={handleColorChange}
                       />
                     </div>
                     <div className="form-group toggle-switch-container">
                       <label>Compte actif:</label>
                       <label className="toggle-switch">
-                        <input 
-                          type="checkbox" 
-                          name="active" 
-                          checked={formData.active !== undefined ? formData.active : true} 
-                          onChange={handleActiveChange} 
+                        <input
+                          type="checkbox"
+                          name="active"
+                          checked={formData.active !== undefined ? formData.active : true}
+                          onChange={handleActiveChange}
                         />
                         <span className="toggle-slider"></span>
                       </label>
@@ -442,11 +455,15 @@ const Utilisateurs = () => {
       </div>
 
       {confirmation && (
-        <div className="confirmation-popup">
-          <p>{confirmation.message}</p>
-          <button className="confirm-btn" onClick={confirmation.onConfirm}>Oui</button>
-          <button className="cancel-btn" onClick={confirmation.onCancel}>Non</button>
-        </div>
+        <DeleteConfirmationModal
+          isOpen={!!confirmation}
+          onClose={confirmation.onCancel}
+          onConfirm={confirmation.onConfirm}
+          title="Confirmer la modification"
+          message={confirmation.message}
+          loading={isLoading}
+          confirmButtonText={isLoading ? "Enregistrement..." : "Confirmer"}
+        />
       )}
 
       {showSuccessEditPopup && (
@@ -483,15 +500,15 @@ const Utilisateurs = () => {
                 <div className="form-group password-field">
                   <label>Mot de passe:</label>
                   <div className="password-input-container">
-                    <input 
-                      type={showNewPassword ? "text" : "password"} 
-                      name="password" 
-                      value={newUtilisateurData.password} 
-                      onChange={handleNewUtilisateurInputChange} 
-                      required 
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      name="password"
+                      value={newUtilisateurData.password}
+                      onChange={handleNewUtilisateurInputChange}
+                      required
                     />
                     <span className="password-toggle" onClick={toggleNewPasswordVisibility}>
-                      {showNewPassword ? <img src={HideIcon} alt="Hide" className="hide-icon" /> : <img src={ShowIcon} alt="Show" className="show-icon" />}
+                      {showNewPassword ? <img src={HideIcon} alt="Hide" className="hideIcon" /> : <img src={ShowIcon} alt="Show" className="showIcon" />}
                     </span>
                   </div>
                 </div>
@@ -505,10 +522,10 @@ const Utilisateurs = () => {
                 </div>
                 <div className="form-group">
                   <label>Agence:</label>
-                  <select 
-                    name="agencyid" 
-                    value={newUtilisateurData.agencyid} 
-                    onChange={handleNewUtilisateurInputChange} 
+                  <select
+                    name="agencyid"
+                    value={newUtilisateurData.agencyid}
+                    onChange={handleNewUtilisateurInputChange}
                     required
                   >
                     <option value="">Sélectionnez une agence</option>
@@ -521,10 +538,10 @@ const Utilisateurs = () => {
                 </div>
                 <div className="form-group">
                   <label>Rôle:</label>
-                  <select 
-                    name="role" 
-                    value={newUtilisateurData.role} 
-                    onChange={handleNewUtilisateurInputChange} 
+                  <select
+                    name="role"
+                    value={newUtilisateurData.role}
+                    onChange={handleNewUtilisateurInputChange}
                     required
                   >
                     <option value="">Sélectionnez un rôle</option>
@@ -535,21 +552,21 @@ const Utilisateurs = () => {
                 </div>
                 <div className="form-group">
                   <label>Couleur distinctive:</label>
-                  <input 
-                    type="color" 
-                    name="distinctcolor" 
-                    value={newUtilisateurData.distinctcolor} 
-                    onChange={handleNewUtilisateurInputChange} 
+                  <input
+                    type="color"
+                    name="distinctcolor"
+                    value={newUtilisateurData.distinctcolor}
+                    onChange={handleNewUtilisateurInputChange}
                   />
                 </div>
                 <div className="form-group toggle-switch-container">
                   <label>Compte actif:</label>
                   <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      name="active" 
-                      checked={newUtilisateurData.active} 
-                      onChange={handleNewUtilisateurInputChange} 
+                    <input
+                      type="checkbox"
+                      name="active"
+                      checked={newUtilisateurData.active}
+                      onChange={handleNewUtilisateurInputChange}
                     />
                     <span className="toggle-slider"></span>
                   </label>
@@ -567,6 +584,18 @@ const Utilisateurs = () => {
           </div>
         </div>
       )}
+
+      <DeleteConfirmationModal
+        isOpen={showConfirmDelete}
+        onClose={() => {
+          setShowConfirmDelete(false);
+          setSelectedUtilisateur(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title="Confirmer la suppression"
+        message={`Êtes-vous sûr de vouloir supprimer l'utilisateur ${selectedUtilisateur?.firstname || ''} ${ selectedUtilisateur?.lastname || ''} ?`}
+        loading={deleteLoading}
+      />
     </div>
   );
 };

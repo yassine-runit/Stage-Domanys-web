@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import { FiPlus, FiX, FiCheck, FiSave, FiUser, FiCalendar, FiBriefcase, FiTag, FiClipboard, FiSearch } from "react-icons/fi";
 import config from '../config';
 import "../styles/ajoutprestation.css";
+import { usePrestations } from "../context/PrestationsContext";
+import { envoyerNotification } from "../utils/notificationUtils";
 
 const AddPrestationModal = ({ onClose }) => {
+    const { addPrestation } = usePrestations();
     const [formData, setFormData] = useState({
         nom: '',
         id_type_prestation: '',
@@ -27,18 +30,18 @@ const AddPrestationModal = ({ onClose }) => {
     const [collaboratorSearch, setCollaboratorSearch] = useState('');
     const [showCollaboratorDropdown, setShowCollaboratorDropdown] = useState(false);
 
-    
+
     useEffect(() => {
         let timeoutId;
         if (showSuccessPopup) {
-           
+
             timeoutId = setTimeout(() => {
                 setShowSuccessPopup(false);
-                onClose(); 
+                onClose();
             }, 3000);
         }
 
-        
+
         return () => {
             if (timeoutId) {
                 clearTimeout(timeoutId);
@@ -61,11 +64,11 @@ const AddPrestationModal = ({ onClose }) => {
 
                 setTypesPrestations(typesData);
                 setPatrimoines(patrimoinesData);
-                
-                const collaboratorsData = usersData.filter(user => 
+
+                const collaboratorsData = usersData.filter(user =>
                     user.role === 'Collab' || user.role === 'Collaborateur'
                 );
-                const adminUsersData = usersData.filter(user => 
+                const adminUsersData = usersData.filter(user =>
                     user.role === 'Admin' || user.role === 'GTI' || user.role === 'DAF'
                 );
 
@@ -83,6 +86,18 @@ const AddPrestationModal = ({ onClose }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+       
+        if (name === 'date_debut' || name === 'date_fin') {
+            const date = new Date(value);
+            console.log(`Date ${name}:`, {
+                original: value,
+                parsed: date.toISOString(),
+                day: date.getDay(), 
+                isDimanche: date.getDay() === 0
+            });
+        }
+
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
@@ -91,7 +106,7 @@ const AddPrestationModal = ({ onClose }) => {
         setShowCollaboratorDropdown(e.target.value.length > 0);
     };
 
-    const filteredCollaborators = collaborators.filter(collab => 
+    const filteredCollaborators = collaborators.filter(collab =>
         `${collab.firstname} ${collab.lastname}`.toLowerCase().includes(collaboratorSearch.toLowerCase())
     );
 
@@ -106,27 +121,42 @@ const AddPrestationModal = ({ onClose }) => {
         setShowCollaboratorDropdown(false);
     };
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch(`${config.API_BASE_URL}/prestations/ajout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...formData,
-                    id_collaborateurs: formData.id_collaborateur
-                })
-            });
-    
-            const responseData = await response.json();
-    
-            if (response.ok) {
+           
+
+            const prestationData = {
+                ...formData,
+                id_collaborateurs: formData.id_collaborateur
+            };
+
+            const result = await addPrestation(prestationData);
+
+            if (result.success) {
                 setShowSuccessPopup(true);
+
+              
+                if (prestationData.id_collaborateurs && prestationData.id_collaborateurs.length > 0) {
+                    const dateObj = new Date(prestationData.date_debut);
+                    const formattedDate = dateObj.toLocaleDateString('fr-FR', {
+                        day: '2-digit',
+                        month: 'long',
+                        year: 'numeric',
+                    });
+
+                    for (const collabId of prestationData.id_collaborateurs) {
+                        await envoyerNotification(
+                            collabId,
+                            "Nouvelle prestation planifiée",
+                            `Une nouvelle prestation a été ajoutée pour le ${formattedDate}. Consultez l'application pour plus d'informations.`
+                        );
+                    }
+                }
             } else {
-                console.error("Détails de l'erreur:", responseData);
-                alert(`Erreur: ${responseData.message || 'Impossible d\'ajouter la prestation'}`);
+                console.error("Détails de l'erreur:", result.error);
+                alert(`Erreur: ${result.error || 'Impossible d\'ajouter la prestation'}`);
             }
         } catch (error) {
             console.error("Erreur de soumission détaillée:", error);
@@ -287,12 +317,12 @@ const AddPrestationModal = ({ onClose }) => {
                                     {showCollaboratorDropdown && filteredCollaborators.length > 0 && (
                                         <div className="collaborators-dropdown">
                                             {filteredCollaborators.map(collab => (
-                                                <div 
-                                                    key={collab.id} 
+                                                <div
+                                                    key={collab.id}
                                                     className="collaborator-option"
                                                     onClick={() => handleCollaboratorSelect(collab.id)}
                                                     style={{
-                                                        backgroundColor: collab.distinctColor 
+                                                        backgroundColor: collab.distinctColor
                                                     }}
                                                 >
                                                     {collab.firstname} {collab.lastname}
@@ -304,15 +334,15 @@ const AddPrestationModal = ({ onClose }) => {
                                         {formData.id_collaborateur.map(id => {
                                             const selectedCollab = collaborators.find(c => c.id === id);
                                             return (
-                                                <div 
-                                                    key={id} 
+                                                <div
+                                                    key={id}
                                                     className="selected-collaborator"
                                                     style={{
                                                         backgroundColor: selectedCollab.distinctcolor || '#004797'
                                                     }}
                                                 >
                                                     {selectedCollab.firstname} {selectedCollab.lastname}
-                                                    <span 
+                                                    <span
                                                         className="remove-collaborator"
                                                         onClick={() => handleCollaboratorSelect(id)}
                                                     >
@@ -330,9 +360,9 @@ const AddPrestationModal = ({ onClose }) => {
                                     <input
                                         type="checkbox"
                                         checked={formData.est_recurrent === "1"}
-                                        onChange={(e) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            est_recurrent: e.target.checked ? "1" : "0" 
+                                        onChange={(e) => setFormData(prev => ({
+                                            ...prev,
+                                            est_recurrent: e.target.checked ? "1" : "0"
                                         }))}
                                     />
                                     <span className="checkmark"></span>

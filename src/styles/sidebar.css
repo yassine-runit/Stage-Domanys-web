@@ -1,4 +1,3 @@
-
 .sidebar {
     width: 280px;
     background: #fff;
@@ -16,11 +15,12 @@
     overflow-y: auto;
     z-index: 100;
     align-items: center;
+    transition: all 0.3s ease;
 }
 
 
 .sidebar-header {
-    
+
     padding: 15px 20px;
     display: flex;
     justify-content: center;
@@ -34,17 +34,18 @@
     justify-content: center;
     align-items: center;
     width: 100%;
+    margin-top: 10px;
 }
 
 .logoDomanys {
     width: 120px;
     height: 60px;
     object-fit: contain;
-    
+
 }
 
 
-.sidebar > *:not(.sidebar-header) {
+.sidebar>*:not(.sidebar-header) {
     padding: 0 20px;
 }
 
@@ -177,6 +178,112 @@
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Media Queries pour la responsivité */
+@media screen and (max-width: 1024px) {
+    .sidebar {
+        width: 240px;
+    }
+
+    .sidebar-section {
+        margin-left: 60px;
+    }
+
+    .create-button {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        width: 60px;
+        padding: 0;
+    }
+
+    .sidebar-header {
+        padding: 10px;
+    }
+
+    .logoDomanys {
+        width: 40px;
+        height: 40px;
+    }
+
+    .sidebar>*:not(.sidebar-header) {
+        padding: 0 10px;
+    }
+
+    .create-button {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .create-button span {
+        display: none;
+    }
+
+    .plus-icon {
+        margin: 0;
+    }
+
+    .sidebar-section {
+        margin-left: 0;
+        text-align: center;
+    }
+
+    .sidebar-section h3 {
+        justify-content: center;
+    }
+
+    .sidebar-section h3 span {
+        display: none;
+    }
+
+    .sidebar-icon {
+        margin: 0;
+        font-size: 20px;
+    }
+
+    .item-label {
+        display: none;
+    }
+
+    .checkbox-container {
+        margin: 0;
+    }
+
+    .sidebar-item {
+        justify-content: center;
+        padding: 8px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .sidebar {
+        width: 50px;
+    }
+
+    .logoDomanys {
+        width: 35px;
+        height: 35px;
+    }
+
+    .create-button {
+        width: 35px;
+        height: 35px;
+    }
+
+    .sidebar-icon {
+        font-size: 18px;
+    }
 }
